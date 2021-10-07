@@ -1,11 +1,78 @@
 package SupplyChain;
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 public class Main {
 	static List nodeName=new ArrayList();
 	static List edgeName=new ArrayList();
+	
+	
+	
+	
+	
+	
+	
+	// create a function named removeEdge that takes string such as "n1n2"
+	//and removes n2 from connected nodes of n1 and vice versa
+	
+	
+	public static void removeEdge(List<Node> tempNodes,String sendS2String) {
+		
+		String node1;
+		String node2;
+		 
+		
+	    String newStr=sendS2String.substring(1,sendS2String.length());
+	    
+	    int indexOfSecondNode=newStr.indexOf('n');
+	    System.out.println(sendS2String);
+	    System.out.println("indexOfSecondNode = "+indexOfSecondNode);
+	    
+	   node1=sendS2String.substring(0,indexOfSecondNode+1);
+	       node2=sendS2String.substring(indexOfSecondNode+1,sendS2String.length());
+	       
+	       
+	       int indexOfNode1=retruningNodeIndex(node1,tempNodes);
+	       int indexOfNode2=retruningNodeIndex(node2,tempNodes);
+		
+	       
+	       List connectedNode1 = tempNodes.get(indexOfNode1).connectedNodes;
+	       List connectedNode2 = tempNodes.get(indexOfNode2).connectedNodes;
+       	
+       	if(connectedNode1.contains(node2)){
+       		
+       		
+       		int indexs = tempNodes.get(indexOfNode1).connectedNodes.indexOf(node2);
+       		//System.out.println("In if indexOf"+ indexs);
+       		tempNodes.get(indexOfNode1).connectedNodes.remove(indexs);
+       	}
+       	
+       	
+       	
+	if(connectedNode2.contains(node1)){
+       		
+       		
+       		int indexs = tempNodes.get(indexOfNode2).connectedNodes.indexOf(node1);
+       		//System.out.println("In if indexOf"+ indexs);
+       		tempNodes.get(indexOfNode2).connectedNodes.remove(indexs);
+       	}
+		
+		
+	}
+
+	
+	
+	
+	
+	
 	
 	public static void sort(List<Node> nodeObjects) throws CloneNotSupportedException{
 		
@@ -146,7 +213,36 @@ public static void removeNodesRandom(List<Node> nodes){
         
 	}
 	
+//removing edges
+/*
+	public static void removeEdges(List<Node>nodes,String name, List edge) {
+		
+		String temp = (String)edge.get(Integer.parseInt(name));
+		System.out.println("temp"+temp);
+		
+		String[] arrSplit = temp.split("n");
+	    for (int i=0; i < arrSplit.length; i++)
+	    {
+	    	arrSplit[i] = "n"+arrSplit[i];
+	    	
+	      System.out.println("split"+arrSplit[i]);
+	    }
+	    
+	    List m = nodes.get(arrSplit[i]).connectedNodes;
+    	
+    	if(m.contains(name)){
+    		
+    		
+    		int indexs = nodes.get(i).connectedNodes.indexOf(name);
+    		//System.out.println("In if indexOf"+ indexs);
+    		nodes.get(i).connectedNodes.remove(indexs);
+    	}
+    	
+		
+	}
 
+
+*/
  	public static void removeNode(List<Node>nodes,String name) {
  		
  		
@@ -383,6 +479,37 @@ public static void removeNodesRandom(List<Node> nodes){
 			
 			}
 		
+		
+		
+		
+		
+		ObjectMapper mapper = new ObjectMapper();
+
+		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+
+		try {
+		 String json = mapper.writeValueAsString(nodeObjects);
+		 System.out.println("ResultingJSONstring = " + json);
+		 //System.out.println(json);
+		 
+		 
+		 
+		//  String jsonInStringPretty = mapper.
+//		                  writerWithDefaultPrettyPrinter().writeValueAsString(json);
+//		           System.out.println(jsonInStringPretty);
+		//  
+		 
+		 
+		} catch (JsonProcessingException e) {
+		  e.printStackTrace();
+		}
+		
+		
+		
+		
+		
+		
+		
 		for(int i =0;i<nodeObjects.size();i++) {
 			
 			System.out.println("Node Objects : "+ ((Node)nodeObjects.get(i)).name + " with degree " + ((Node)nodeObjects.get(i)).degree );
@@ -481,9 +608,15 @@ public static void removeNodesRandom(List<Node> nodes){
 	}
 	robustness = robustness/(double)originalSizeOfObject;
 	System.out.println("final robustness of network = "+ robustness);
+    double percentageHDA = 0;
+    
+    percentageHDA = ((double)robustness/(0.5))*100;
+    System.out.println("Percentage for HDA"+percentageHDA);
+	
 	
 	//*************Random attack**********
 	System.out.println("Creating attack based on random node removal");
+	robustness=0;
 	
 	print(nodeObjects);
 	
@@ -515,9 +648,13 @@ public static void removeNodesRandom(List<Node> nodes){
 	
 	robustness = robustness/(double)originalSizeOfObject;
 	System.out.println("final robustness of network = "+ robustness);
+    double percentageRandom = 0;
+    
+    percentageRandom = ((double)robustness/(0.5))*100;
+    System.out.println("Percentage for Random"+percentageRandom);
 
 	//betweeness centrality attack
-	System.out.println("Creting attack based on betweeness centrality ");	
+	System.out.println("Creating attack based on betweeness centrality ");	
 	
 	BetweenessCentrality.test();	
 	
@@ -600,7 +737,29 @@ public static void removeNodesRandom(List<Node> nodes){
 		str = s.substring(1)+str;
 	}
 	
+	
     int n = str.length();
+    
+   //**********************declaring array for permutations***********************
+    
+    //changing permute function for accepting array
+    
+    int lengthOfArray = nodeObjects.size() + edges.size();
+    
+    //declaring array for new permute function
+    
+    String arrString = "";
+    int[] a = new int[lengthOfArray];  
+    
+for(int i=0;i<nodes.size();i++) {
+		
+		String s= ((Node)nodes.get(i)).name;
+		arrString = s.substring(1);
+		a[i] = Integer.parseInt(arrString);
+		System.out.println("Printing array = "+a[i]);
+	}
+	
+    
     
     System.out.println("String ="+str+n);
     //CombinationGeeks permutation = new CombinationGeeks();
@@ -661,6 +820,107 @@ public static void removeNodesRandom(List<Node> nodes){
     }
     meanRobustness = meanRobustness/finalRobustness.size();
     System.out.println("final value of robustness = "+meanRobustness);
+    
+    
 
+	//calculating exhaustive combinations for edges failure
+    
+    
+    
+    List edgesIndex = new ArrayList();
+    
+    for(int i=0;i<edges.size();i++) {
+    	
+    	edgesIndex.add(i);
+    	System.out.println("edges in last "+ edges.get(i) + " "+edgesIndex.get(i));
+    }
+    
+    
+    
+    String edgeCom = "";
+	List edgeCombinations = new ArrayList();
+
+	for(int i=0;i<edgesIndex.size();i++) {
+		
+		//String s= ((Node)nodes.get(i)).name;
+		edgeCom = edgeCom + edgesIndex.get(i);
+	}
+    
+    int len = edgeCom.length();
+    
+    System.out.println("String ="+edgeCom+len);
+    //CombinationGeeks permutation = new CombinationGeeks();
+    permute(edgeCom, 0, len - 1,edgeCombinations);
+
+    
+    
+    
+    ArrayList<Double> finalRobustnessEdge = new ArrayList<>();
+    double robustEdge =0;
+    double finalRobustEdge = 0;
+    for(int i=0;i<edgeCombinations.size();i++) {
+    	
+    	robustEdge =0;
+    	
+    	String s1 = (String) edgeCombinations.get(i);
+    	System.out.println("s1 = "+ s1);
+    	int lengthOfString = nodes.size();
+    	
+    	//creating temporary list for removing nodes
+		List tempNodes = new ArrayList();
+		
+		for(int k=0; k<nodes.size();k++) {
+    		
+			tempNodes.add(new Node((Node)nodes.get(k)));
+    		
+    	}
+    	
+    	
+    	for(int j=0;j<s1.length();j++) {
+    		
+    		String s2= String.valueOf(s1.charAt(j));
+    		//print(tempNodes);
+    		
+    		int s2Val=Integer.valueOf(s2);
+    		
+    		String sendS2String=edges.get(s2Val).toString();
+    		System.out.println("sendS2String = "+sendS2String);
+    		//removeNode(tempNodes,"n"+s2);
+    		// create a function named removeEdge that takes string such as "n1n2"
+    		//and removes n2 from connected nodes of n1 and vice versa
+    		
+    		
+    		removeEdge(tempNodes,sendS2String);
+    		
+    		print(tempNodes);
+    		lcc = sizeOfLargestConnectedComponent(tempNodes);
+    		System.out.println("Returned LCC = "+ lcc);
+    		robustEdge = robustEdge + ((double)lcc/(double)lengthOfString);
+    		System.out.println("robustness Edge = "+ robustEdge);	
+    	}
+    	
+    	finalRobustEdge = ((double)1/(lengthOfString)*(double)robustEdge);
+    	System.out.println("final robustness Edge = "+finalRobustEdge);
+    	finalRobustnessEdge.add(finalRobustEdge);
+    }
+    //taking mean for a single robustness value
+    double meanRobustnessEdge = 0.0;
+    for(int i=0;i<finalRobustnessEdge.size();i++) {
+    	meanRobustnessEdge = meanRobustnessEdge + finalRobustnessEdge.get(i);
+    			//(double)finalRobust/(double)nodes.size();
+    }
+    meanRobustnessEdge = meanRobustnessEdge/finalRobustnessEdge.size();
+    System.out.println("final value of robustness for edges = "+meanRobustnessEdge);
+    double finalMean = 0;
+    finalMean = (meanRobustnessEdge + meanRobustness)/2;
+    System.out.println("Final mean"+finalMean);
+    
+    double percentageExhaustiveCombi = 0;
+    
+    percentageExhaustiveCombi = ((double)finalMean/(0.5))*100;
+    System.out.println("Percentage for exhaustive combi"+percentageExhaustiveCombi);
+    
+	
+	
 	}
 }
